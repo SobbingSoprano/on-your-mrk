@@ -45,12 +45,11 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   
   # Audio & Voice
-  agora_rtc_engine: ^6.3.0
+  # agora_rtc_engine: ^6.3.0  # TODO: Enable after Agora setup
   flutter_tts: ^3.8.5
-  
+
   # Notifications
-  firebase_messaging: ^14.7.6
-  flutter_local_notifications: ^16.2.0
+  # firebase_messaging: ^14.7.6  # TODO: Enable after Firebase setup
   
   # Health & Fitness
   # health: ^10.0.0  # TODO: Re-enable when intl compatibility fixed
