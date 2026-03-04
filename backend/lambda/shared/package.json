@@ -1,0 +1,23 @@
+{
+  "name": "@oym/lambda-shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for OyM Lambda functions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/lib-dynamodb": "^3.450.0",
+    "@aws-sdk/client-sns": "^3.450.0",
+    "@aws-sdk/client-s3": "^3.450.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.130",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,26 @@
+# Documentation - not ready for repo yet
+README.md
+**/README.md
+docs/
+SESSION_NOTES.md
+**/SESSION_NOTES.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter SDK (using system Flutter, not bundled)
+flutter/
+
+# Sensitive configs
+*.env
+*.env.local
+.env.*.local
+
+# Session notes (duplicate entry removed, now at top)

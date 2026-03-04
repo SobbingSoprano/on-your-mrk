@@ -1,0 +1,111 @@
+{
+  "UserAgent": "aws-amplify-cli/2.0",
+  "Version": "1.0",
+  "api": {
+    "plugins": {
+      "awsAPIPlugin": {
+        "oymApi": {
+          "endpointType": "GraphQL",
+          "endpoint": "${APPSYNC_ENDPOINT}",
+          "region": "${AWS_REGION}",
+          "authorizationType": "AMAZON_COGNITO_USER_POOLS",
+          "apiKey": "${API_KEY}"
+        }
+      }
+    }
+  },
+  "auth": {
+    "plugins": {
+      "awsCognitoAuthPlugin": {
+        "UserAgent": "aws-amplify-cli/0.1.0",
+        "Version": "0.1.0",
+        "IdentityManager": {
+          "Default": {}
+        },
+        "CredentialsProvider": {
+          "CognitoIdentity": {
+            "Default": {
+              "PoolId": "${IDENTITY_POOL_ID}",
+              "Region": "${AWS_REGION}"
+            }
+          }
+        },
+        "CognitoUserPool": {
+          "Default": {
+            "PoolId": "${USER_POOL_ID}",
+            "AppClientId": "${USER_POOL_CLIENT_ID}",
+            "Region": "${AWS_REGION}"
+          }
+        },
+        "Auth": {
+          "Default": {
+            "authenticationFlowType": "USER_SRP_AUTH",
+            "socialProviders": [],
+            "usernameAttributes": ["EMAIL"],
+            "signupAttributes": ["EMAIL"],
+            "passwordProtectionSettings": {
+              "passwordPolicyMinLength": 8,
+              "passwordPolicyCharacters": [
+                "REQUIRES_LOWERCASE",
+                "REQUIRES_UPPERCASE",
+                "REQUIRES_NUMBERS"
+              ]
+            },
+            "mfaConfiguration": "OFF",
+            "mfaTypes": [],
+            "verificationMechanisms": ["EMAIL"]
+          }
+        }
+      }
+    }
+  },
+  "storage": {
+    "plugins": {
+      "awsS3StoragePlugin": {
+        "bucket": "${MEDIA_BUCKET}",
+        "region": "${AWS_REGION}",
+        "defaultAccessLevel": "protected"
+      }
+    }
+  },
+  "analytics": {
+    "plugins": {
+      "awsPinpointAnalyticsPlugin": {
+        "pinpointAnalytics": {
+          "appId": "${PINPOINT_APP_ID}",
+          "region": "${AWS_REGION}"
+        },
+        "pinpointTargeting": {
+          "region": "${AWS_REGION}"
+        }
+      }
+    }
+  },
+  "notifications": {
+    "plugins": {
+      "awsPinpointPushNotificationsPlugin": {
+        "appId": "${PINPOINT_APP_ID}",
+        "region": "${AWS_REGION}"
+      }
+    }
+  },
+  "geo": {
+    "plugins": {
+      "awsLocationGeoPlugin": {
+        "region": "${AWS_REGION}",
+        "maps": {
+          "items": {
+            "oymMapStyles": {
+              "style": "VectorEsriStreets"
+            }
+          },
+          "default": "oymMapStyles"
+        },
+        "searchIndices": {
+          "items": ["oymSearchIndex"],
+          "default": "oymSearchIndex"
+        }
+      }
+    }
+  }
+}

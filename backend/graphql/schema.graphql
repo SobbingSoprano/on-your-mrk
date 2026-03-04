@@ -1,0 +1,620 @@
+# on your Mark! - GraphQL Schema
+# AWS AppSync API Definition
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+type Query {
+  # User
+  getUser(id: ID!): User
+  getCurrentUser: User
+  
+  # Courses
+  getCourse(id: ID!): Course
+  listCourses(filter: CourseFilterInput, limit: Int, nextToken: String): CourseConnection
+  searchCourses(query: String!, location: GeoPointInput, radiusMeters: Float): CourseConnection
+  getNearbyCourses(location: GeoPointInput!, radiusMeters: Float!): [Course]
+  
+  # Active Routes
+  getActiveRoute(id: ID!): ActiveRoute
+  getUserActiveRoute: ActiveRoute
+  
+  # dis'Course' Sessions
+  getDiscourseSession(id: ID!): DiscourseSession
+  listDiscourseSessions(filter: DiscourseFilterInput): [DiscourseSession]
+  
+  # Reviews
+  getCourseReviews(courseId: ID!, limit: Int, nextToken: String): ReviewConnection
+  
+  # Safety
+  getTrustedContacts: [TrustedContact]
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+type Mutation {
+  # User Management
+  updateUserProfile(input: UpdateUserProfileInput!): User
+  updateSafetySettings(input: UpdateSafetySettingsInput!): User
+  
+  # Trusted Contacts
+  addTrustedContact(input: AddTrustedContactInput!): TrustedContact
+  removeTrustedContact(contactId: ID!): Boolean
+  
+  # Course Management
+  createCourse(input: CreateCourseInput!): Course
+  updateCourse(id: ID!, input: UpdateCourseInput!): Course
+  deleteCourse(id: ID!): Boolean
+  
+  # Course Reviews
+  createReview(input: CreateReviewInput!): Review
+  updateReview(id: ID!, input: UpdateReviewInput!): Review
+  deleteReview(id: ID!): Boolean
+  
+  # Active Route
+  startRoute(input: StartRouteInput!): ActiveRoute
+  updateRouteLocation(input: UpdateLocationInput!): ActiveRoute
+  pauseRoute(id: ID!): ActiveRoute
+  resumeRoute(id: ID!): ActiveRoute
+  completeRoute(id: ID!): ActiveRoute
+  cancelRoute(id: ID!): ActiveRoute
+  
+  # Safety
+  triggerEmergency(input: EmergencyInput!): EmergencyResponse
+  sendLocationPing(input: LocationPingInput!): Boolean
+  updateAwolStatus(input: AwolStatusInput!): Boolean
+  saveBreadcrumb(input: BreadcrumbInput!): Breadcrumb
+  
+  # dis'Course' Sessions
+  createDiscourseSession(input: CreateDiscourseInput!): DiscourseSession
+  joinDiscourseSession(sessionId: ID!): DiscourseSession
+  leaveDiscourseSession(sessionId: ID!): Boolean
+  startDiscourseSession(sessionId: ID!): DiscourseSession
+  updateSegmentStatus(input: UpdateSegmentInput!): DiscourseSession
+  endDiscourseSession(sessionId: ID!): DiscourseSession
+  
+  # Parking (WDIPA?)
+  saveParkingLocation(input: ParkingLocationInput!): ParkingLocation
+  clearParkingLocation: Boolean
+  
+  # Real-time updates (used by subscriptions)
+  updateParticipantLocation(input: ParticipantLocationInput!): ParticipantLocation
+  updateDiscourseSession(sessionId: ID!, status: DiscourseStatus!): DiscourseSession
+  sendSafetyAlert(input: SafetyAlertInput!): SafetyAlert
+}
+
+# =============================================================================
+# SUBSCRIPTIONS
+# =============================================================================
+
+type Subscription {
+  # Real-time location updates for dis'Course'
+  onParticipantLocationUpdate(sessionId: ID!): ParticipantLocation
+    @aws_subscribe(mutations: ["updateParticipantLocation"])
+  
+  # Session status changes
+  onDiscourseSessionUpdate(sessionId: ID!): DiscourseSession
+    @aws_subscribe(mutations: ["updateDiscourseSession"])
+  
+  # Safety alerts for trusted contacts
+  onSafetyAlert(userId: ID!): SafetyAlert
+    @aws_subscribe(mutations: ["sendSafetyAlert"])
+}
+
+# =============================================================================
+# TYPES
+# =============================================================================
+
+type User {
+  id: ID!
+  email: String!
+  displayName: String!
+  profileImageUrl: String
+  profile: UserProfile!
+  safetySettings: SafetySettings!
+  trustedContacts: [TrustedContact]
+  stats: UserStats
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type UserProfile {
+  firstName: String
+  lastName: String
+  dateOfBirth: AWSDate
+  weightKg: Float
+  heightCm: Float
+  gender: Gender
+  fitnessLevel: FitnessLevel!
+  preferredActivities: [String]
+  healthKitEnabled: Boolean
+  googleFitEnabled: Boolean
+}
+
+type UserStats {
+  totalDistanceMeters: Float
+  totalTimeSeconds: Int
+  totalRoutes: Int
+  totalCoursesCreated: Int
+  averagePaceMinPerKm: Float
+}
+
+type SafetySettings {
+  locationPingingEnabled: Boolean!
+  locationPingIntervalSeconds: Int!
+  awolEnabled: Boolean!
+  awolTimeoutMinutes: Int!
+  breadcrumbsEnabled: Boolean!
+  breadcrumbIntervalMeters: Int!
+  autoOfflineBreadcrumbs: Boolean!
+  emergencyButtonEnabled: Boolean!
+  emergencyMessage: String
+}
+
+type TrustedContact {
+  id: ID!
+  userId: ID!
+  name: String!
+  phone: String
+  email: String
+  notifyOnEmergency: Boolean!
+  notifyOnAwol: Boolean!
+  notifyOnLocationPing: Boolean!
+  createdAt: AWSDateTime!
+}
+
+type Course {
+  id: ID!
+  creatorId: ID!
+  creator: User
+  name: String!
+  description: String
+  imageUrl: String
+  waypoints: [GeoPoint]!
+  routePath: [GeoPoint]!
+  distanceMeters: Float!
+  elevationGainMeters: Float!
+  estimatedMinutes: Int!
+  difficulty: CourseDifficulty!
+  trafficRating: TrafficRating!
+  stats: CourseStats!
+  tags: [String]
+  isPublic: Boolean!
+  isCollaborative: Boolean!
+  shapeDescription: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type CourseStats {
+  completionCount: Int!
+  averageRating: Float!
+  reviewCount: Int!
+  averageCompletionMinutes: Int!
+  favoriteCount: Int!
+}
+
+type TrafficRating {
+  pedestrianTraffic: TrafficLevel!
+  vehicleTraffic: TrafficLevel!
+  notes: String
+  lastUpdated: AWSDateTime!
+}
+
+type GeoPoint {
+  latitude: Float!
+  longitude: Float!
+  altitude: Float
+  accuracy: Float
+  timestamp: AWSDateTime
+}
+
+type Breadcrumb {
+  id: ID!
+  latitude: Float!
+  longitude: Float!
+  altitude: Float
+  sequenceNumber: Int!
+  isOffline: Boolean!
+  timestamp: AWSDateTime!
+}
+
+type ActiveRoute {
+  id: ID!
+  userId: ID!
+  courseId: ID
+  course: Course
+  status: ActiveRouteStatus!
+  startPoint: GeoPoint!
+  endPoint: GeoPoint
+  currentLocation: GeoPoint!
+  distanceCoveredMeters: Float!
+  elevationGainMeters: Float!
+  elapsedSeconds: Int!
+  estimatedSecondsRemaining: Int
+  navigationState: NavigationState
+  safetyState: SafetyState!
+  startedAt: AWSDateTime!
+  completedAt: AWSDateTime
+  lastUpdated: AWSDateTime!
+}
+
+type NavigationState {
+  nextWaypoint: GeoPoint!
+  waypointIndex: Int!
+  totalWaypoints: Int!
+  distanceToNextMeters: Float!
+  currentInstruction: NavigationInstruction!
+  upcomingInstruction: NavigationInstruction
+}
+
+type NavigationInstruction {
+  maneuver: NavigationManeuver!
+  streetName: String!
+  distanceMeters: Float!
+  spokenInstruction: String!
+}
+
+type SafetyState {
+  isLocationPinging: Boolean!
+  lastPingSent: AWSDateTime
+  isAwolActive: Boolean!
+  awolDeadline: AWSDateTime
+  isOffline: Boolean!
+  wentOfflineAt: AWSDateTime
+  breadcrumbCount: Int!
+  lastKnownLocation: GeoPoint
+  lastServerContact: AWSDateTime
+}
+
+type DiscourseSession {
+  id: ID!
+  hostUserId: ID!
+  name: String!
+  course: Course!
+  participants: [DiscourseParticipant]!
+  segments: [DiscourseSegment]!
+  status: DiscourseStatus!
+  voiceChatChannelId: String
+  scheduledStartTime: AWSDateTime!
+  actualStartTime: AWSDateTime
+  completedAt: AWSDateTime
+  createdAt: AWSDateTime!
+}
+
+type DiscourseParticipant {
+  userId: ID!
+  displayName: String!
+  profileImageUrl: String
+  status: ParticipantStatus!
+  assignedSegmentIndex: Int!
+  currentLocation: GeoPoint
+  isVoiceMuted: Boolean!
+  joinedAt: AWSDateTime!
+}
+
+type DiscourseSegment {
+  index: Int!
+  assignedUserId: ID
+  startPoint: GeoPoint!
+  endPoint: GeoPoint!
+  distanceMeters: Float!
+  status: SegmentStatus!
+  startedAt: AWSDateTime
+  completedAt: AWSDateTime
+}
+
+type ParticipantLocation {
+  sessionId: ID!
+  userId: ID!
+  location: GeoPoint!
+  timestamp: AWSDateTime!
+}
+
+type Review {
+  id: ID!
+  courseId: ID!
+  userId: ID!
+  user: User
+  rating: Int!
+  title: String
+  comment: String
+  difficultyAccuracy: Int
+  trafficAccuracy: Int
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type ReviewConnection {
+  items: [Review]!
+  nextToken: String
+}
+
+type CourseConnection {
+  items: [Course]!
+  nextToken: String
+}
+
+type EmergencyResponse {
+  success: Boolean!
+  alertsSent: Int!
+  timestamp: AWSDateTime!
+}
+
+type SafetyAlert {
+  type: SafetyAlertType!
+  userId: ID!
+  userName: String!
+  location: GeoPoint!
+  message: String
+  timestamp: AWSDateTime!
+}
+
+type ParkingLocation {
+  id: ID!
+  userId: ID!
+  location: GeoPoint!
+  address: String
+  notes: String
+  savedAt: AWSDateTime!
+}
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
+}
+
+enum FitnessLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ATHLETE
+}
+
+enum CourseDifficulty {
+  EASY
+  MODERATE
+  HARD
+  EXPERT
+}
+
+enum TrafficLevel {
+  LOW
+  MODERATE
+  HIGH
+  VERY_HIGH
+}
+
+enum ActiveRouteStatus {
+  PREPARING
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+  EMERGENCY
+}
+
+enum NavigationManeuver {
+  STRAIGHT
+  TURN_LEFT
+  TURN_RIGHT
+  SLIGHT_LEFT
+  SLIGHT_RIGHT
+  SHARP_LEFT
+  SHARP_RIGHT
+  U_TURN
+  ARRIVE
+  DEPART
+}
+
+enum DiscourseStatus {
+  PLANNING
+  WAITING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ParticipantStatus {
+  WAITING
+  READY
+  RUNNING
+  COMPLETED
+  SPECTATING
+  DISCONNECTED
+}
+
+enum SegmentStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+}
+
+enum SafetyAlertType {
+  EMERGENCY
+  AWOL
+  LOCATION_PING
+}
+
+# =============================================================================
+# INPUTS
+# =============================================================================
+
+input GeoPointInput {
+  latitude: Float!
+  longitude: Float!
+  altitude: Float
+  accuracy: Float
+}
+
+input CourseFilterInput {
+  difficulty: CourseDifficulty
+  minDistanceMeters: Float
+  maxDistanceMeters: Float
+  isCollaborative: Boolean
+  tags: [String]
+  creatorId: ID
+}
+
+input DiscourseFilterInput {
+  status: DiscourseStatus
+  hostUserId: ID
+  participantUserId: ID
+}
+
+input UpdateUserProfileInput {
+  firstName: String
+  lastName: String
+  dateOfBirth: AWSDate
+  weightKg: Float
+  heightCm: Float
+  gender: Gender
+  fitnessLevel: FitnessLevel
+  preferredActivities: [String]
+  healthKitEnabled: Boolean
+  googleFitEnabled: Boolean
+}
+
+input UpdateSafetySettingsInput {
+  locationPingingEnabled: Boolean
+  locationPingIntervalSeconds: Int
+  awolEnabled: Boolean
+  awolTimeoutMinutes: Int
+  breadcrumbsEnabled: Boolean
+  breadcrumbIntervalMeters: Int
+  autoOfflineBreadcrumbs: Boolean
+  emergencyButtonEnabled: Boolean
+  emergencyMessage: String
+}
+
+input AddTrustedContactInput {
+  name: String!
+  phone: String
+  email: String
+  notifyOnEmergency: Boolean!
+  notifyOnAwol: Boolean!
+  notifyOnLocationPing: Boolean!
+}
+
+input CreateCourseInput {
+  name: String!
+  description: String
+  waypoints: [GeoPointInput]!
+  difficulty: CourseDifficulty!
+  tags: [String]
+  isPublic: Boolean
+  isCollaborative: Boolean
+  shapeDescription: String
+}
+
+input UpdateCourseInput {
+  name: String
+  description: String
+  waypoints: [GeoPointInput]
+  difficulty: CourseDifficulty
+  tags: [String]
+  isPublic: Boolean
+  isCollaborative: Boolean
+}
+
+input CreateReviewInput {
+  courseId: ID!
+  rating: Int!
+  title: String
+  comment: String
+  difficultyAccuracy: Int
+  trafficAccuracy: Int
+}
+
+input UpdateReviewInput {
+  rating: Int
+  title: String
+  comment: String
+  difficultyAccuracy: Int
+  trafficAccuracy: Int
+}
+
+input StartRouteInput {
+  courseId: ID
+  startPoint: GeoPointInput!
+  enableLocationPinging: Boolean
+  enableAwol: Boolean
+  awolTimeoutMinutes: Int
+}
+
+input UpdateLocationInput {
+  routeId: ID!
+  location: GeoPointInput!
+}
+
+input EmergencyInput {
+  location: GeoPointInput!
+  message: String
+}
+
+input LocationPingInput {
+  location: GeoPointInput!
+  routeId: ID
+}
+
+input AwolStatusInput {
+  routeId: ID!
+  isActive: Boolean!
+  timeoutMinutes: Int
+}
+
+input BreadcrumbInput {
+  routeId: ID!
+  location: GeoPointInput!
+  sequenceNumber: Int!
+  isOffline: Boolean!
+}
+
+input CreateDiscourseInput {
+  name: String!
+  courseId: ID!
+  scheduledStartTime: AWSDateTime!
+  segmentCount: Int!
+}
+
+input UpdateSegmentInput {
+  sessionId: ID!
+  segmentIndex: Int!
+  status: SegmentStatus!
+}
+
+input ParkingLocationInput {
+  location: GeoPointInput!
+  address: String
+  notes: String
+}
+
+input ParticipantLocationInput {
+  sessionId: ID!
+  location: GeoPointInput!
+  heading: Float
+  speed: Float
+  accuracy: Float
+}
+
+input SafetyAlertInput {
+  userId: ID!
+  type: SafetyAlertType!
+  location: GeoPointInput!
+  message: String
+}
