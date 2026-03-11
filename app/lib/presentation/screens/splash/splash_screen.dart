@@ -49,14 +49,11 @@ class _SplashScreenState extends State<SplashScreen>
     if (mounted) {
       // TODO: Check if user is authenticated
       final isAuthenticated = false; // Replace with actual auth check
-      final hasCompletedOnboarding = false; // Replace with actual check
 
       if (isAuthenticated) {
         context.go(Routes.home);
-      } else if (hasCompletedOnboarding) {
-        context.go(Routes.login);
       } else {
-        context.go(Routes.onboarding);
+        context.go(Routes.login);
       }
     }
   }

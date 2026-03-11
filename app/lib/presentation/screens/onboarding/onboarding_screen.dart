@@ -16,25 +16,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingPage> _pages = [
     OnboardingPage(
-      title: 'Draw Your Path',
-      description: 'Create beautiful shapes with your running and walking routes. Turn your city into a canvas.',
+      title: 'Your City is Your Canvas',
+      description: 'Draw shapes, spell words, or sketch art, all with your feet. Every run becomes a masterpiece on the map.',
       icon: Icons.gesture,
       color: AppColors.primary,
     ),
     OnboardingPage(
-      title: 'Navigate with Confidence',
-      description: 'Turn-by-turn voice navigation guides you along your custom route. Never miss a turn.',
+      title: 'Never Miss a Turn',
+      description: 'Voice-guided navigation keeps you on track so you can focus on the run, not the route.',
       icon: Icons.navigation,
       color: AppColors.secondary,
     ),
     OnboardingPage(
-      title: 'Run Together',
-      description: "dis'Course' lets you tackle routes as a team with built-in voice chat. Relay-style running!",
+      title: 'Discourse: Run Together',
+      description: "tackle routes as a team with built-in voice chat. Relay-style running!",
       icon: Icons.group,
       color: AppColors.accent,
     ),
     OnboardingPage(
-      title: 'Stay Safe',
+      title: 'Staying Safe',
       description: 'Emergency alerts, location sharing, and breadcrumb trails keep you protected.',
       icon: Icons.shield,
       color: AppColors.safe,
@@ -59,8 +59,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _completeOnboarding() {
-    // TODO: Save onboarding completion
-    context.go(Routes.login);
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.login);
+    }
   }
 
   @override

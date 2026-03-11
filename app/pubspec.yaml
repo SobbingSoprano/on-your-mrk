@@ -34,7 +34,7 @@ dependencies:
   amplify_storage_s3: ^2.0.0
   
   # Maps & Location
-  mapbox_maps_flutter: ^1.0.0
+  mapbox_maps_flutter: ^2.0.0
   geolocator: ^10.1.0
   flutter_compass: ^0.8.0
   
@@ -76,6 +76,7 @@ dependencies:
   # Encryption
   pointycastle: ^3.7.3
   encrypt: ^5.0.3
+  google_fonts: ^8.0.2
 
 dev_dependencies:
   flutter_test:
@@ -96,11 +97,11 @@ flutter:
     - assets/animations/
     - assets/maps/
   
-  fonts:
-    - family: OnYourMark
-      fonts:
-        - asset: assets/fonts/OnYourMark-Regular.ttf
-        - asset: assets/fonts/OnYourMark-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/OnYourMark-Light.ttf
-          weight: 300
+  # fonts:
+  #   - family: OnYourMark
+  #     fonts:
+  #       - asset: assets/fonts/OnYourMark-Regular.ttf
+  #       - asset: assets/fonts/OnYourMark-Bold.ttf
+  #         weight: 700
+  #       - asset: assets/fonts/OnYourMark-Light.ttf
+  #         weight: 300
